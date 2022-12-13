@@ -34,7 +34,7 @@ class Console:
             except:pass
         else:
             try:
-                self.variables.update(
+                self.variables.update( 
                     json.load(open(self.dir+"/config.json"))
                 )
             except:pass
