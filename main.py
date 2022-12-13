@@ -3,7 +3,7 @@ import os,sys,ArgumentParser,appdirs,json
 from colorama import Fore, init
 from pynput.keyboard import Key,KeyCode
 from lib import formats,login
-import ChoiceInput as CI
+import CInput as CI
 from pathlib import Path
 from const import ERR
 
