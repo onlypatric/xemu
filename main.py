@@ -75,9 +75,6 @@ class Console:
                 break;
         else:
             CODE=os.system(self.last)
-            if not CODE:
-                pass
-            else:sys.stdout.write(ERR)
     def update(self):
         self.variables.update(
             {
