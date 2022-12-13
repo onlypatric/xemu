@@ -35,7 +35,6 @@ formatOptions = {
     "$B": "|",
     "$CH0": "(",
     "$D": datetime.now().strftime("%D"),
-    "$E": "\x1b",
     "$F": ")",
     "$G": ">",
     "$H": "~",

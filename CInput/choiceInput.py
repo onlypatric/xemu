@@ -2,7 +2,7 @@ import os
 import sys
 from pynput import keyboard
 from pynput.keyboard import Key
-from colorama import Fore,init,Back
+from colorama import Fore, Style,init,Back
 init();
 class ChoiceInput:
     def __init__(self,choices:"list[str]",colored:bool=False,color=Back.CYAN,up:Key=Key.up,down:Key=Key.down) -> None:
@@ -27,7 +27,7 @@ class ChoiceInput:
         for a,b in zip(self.choices,self.focuses):
             if b:
                 if self.colored:
-                    sys.stdout.write(f"{self.color}{a}\n{Back.RESET}")
+                    sys.stdout.write(f"{self.color}{a}\n{Back.RESET+Fore.RESET+Style.NORMAL}")
                 else:
                     sys.stdout.write(f"({a})\n")
             else:sys.stdout.write(f"{a}  \n")
