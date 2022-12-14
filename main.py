@@ -78,13 +78,105 @@ class Console:
         if os.path.exists(dir_) and os.path.isdir(dir_):
             os.chdir(dir_)
 # ---------------------- Run some files command
-    #TODO: Finish globally run script files
     def runFile(self):
         if(self.last_params == []):
             sys.stdout.write(f"NO_FILE_EXCEPTION: {NO_FILE_ERR}")
             return;
         scriptName=self.last_params[0]
-
+        if scriptName.endswith(".c"):
+            if not os.system(f"gcc -S {scriptName} -o {scriptName[:-2]}.s"):
+                if not os.system(f"gcc {scriptName[:-2]}.s -o {scriptName[:-2]}"):
+                    R=os.system(f"./{scriptName[:-2]}")
+                    if not R:
+                        if self.variables.get("#SHOWCODE",False):
+                            sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+                    else:
+                        if self.variables.get("#SHOWCODE",False):
+                            sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+                else:sys.stdout.write(COMPILE_ERR)
+            else:sys.stdout.write(COMPILE_ERR)
+        elif scriptName.endswith(".cpp"):
+            if not os.system(f"g++ {scriptName} -o {scriptName[:-2]}"):
+                R=os.system(f"./{scriptName[:-2]}")
+                if not R:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+                else:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+            else:sys.stdout.write(COMPILE_ERR)
+        elif scriptName.endswith(".java"):
+            if not os.system(f"javac {scriptName}"):
+                R=os.system(f"java {scriptName[:-5]}")
+                if not R:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+                else:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+            else:sys.stdout.write(COMPILE_ERR)
+        elif scriptName.endswith(".js"):
+            R=os.system(f"node {scriptName}")
+            if not R:
+                if self.variables.get("#SHOWCODE",False):
+                    sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+            else:
+                if self.variables.get("#SHOWCODE",False):
+                    sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+        elif scriptName.endswith(".py"):
+            if os.name=="nt":
+                R=os.system(f"python {scriptName}")
+                if not R:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+                else:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+            else:
+                R=os.system(f"python3 {scriptName}")
+                if not R:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+                else:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+        elif scriptName.endswith(".pyw"):
+            if os.name=="nt":
+                R=os.system(f"pythonw {scriptName}")
+                if not R:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+                else:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+            else:
+                R=os.system(f"pythonw3 {scriptName}")
+                if not R:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+                else:
+                    if self.variables.get("#SHOWCODE",False):
+                        sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+        elif scriptName.endswith(".s"):
+            R=os.system(f"rb {scriptName}")
+            if not R:
+                if self.variables.get("#SHOWCODE",False):
+                    sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+            else:
+                if self.variables.get("#SHOWCODE",False):
+                    sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+        elif scriptName.endswith(".s"):
+            if not os.system(f"gcc -c {scriptName} -o {scriptName[:-2]}.o"):
+                if not os.system(f"gcc {scriptName[:-2]}.o -o {scriptName[:-2]}"):
+                    R=os.system(f"./{scriptName[:-2]}")
+                    if not R:
+                        if self.variables.get("#SHOWCODE",False):
+                            sys.stdout.write(f"Executed{Fore.GREEN} successfully{Fore.RESET}")
+                    else:
+                        if self.variables.get("#SHOWCODE",False):
+                            sys.stdout.write(f"Encountered{Fore.GREEN} error{R}{Fore.RESET}")
+                else:sys.stdout.write(COMPILE_ERR)
+            else:sys.stdout.write(COMPILE_ERR)
     def execute(self,parameters:"list[str]"=None,settings:"dict[str,str]"=None):
         formats.update()
         if settings is None:
