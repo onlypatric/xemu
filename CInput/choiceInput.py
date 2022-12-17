@@ -6,6 +6,7 @@ from colorama import Fore, Style,init,Back
 init();
 class ChoiceInput:
     def __init__(self,choices:"list[str]",colored:bool=False,color=Back.CYAN,up:Key=Key.up,down:Key=Key.down) -> None:
+        self.longest=max([len(i) for i in choices])
         self.stopped=False
         self.lines=len(choices);
         self.up=up
@@ -24,21 +25,24 @@ class ChoiceInput:
     def get(self):
         return self.choices[self.index]
     def update(self):
+        sys.stdout.write("┌"+"─"*(self.longest+2)+"┐\n")
         for a,b in zip(self.choices,self.focuses):
             if b:
                 if self.colored:
-                    sys.stdout.write(f"{self.color}{a}\n{Back.RESET+Fore.RESET+Style.NORMAL}")
+                    sys.stdout.write(f"%-{self.longest+3}s%s"%(f"│{self.color}{a}{Back.RESET+Fore.RESET+Style.NORMAL}","\n"))
                 else:
-                    sys.stdout.write(f"({a})\n")
-            else:sys.stdout.write(f"{a}  \n")
+                    sys.stdout.write(f"%-{self.longest+3}s%s"%(f"│({a})","│\n"))
+            else:sys.stdout.write(f"%-{self.longest+3}s%s"%(f"│{a}","│\n"))
             sys.stdout.flush()
+        sys.stdout.write("└"+"─"*(self.longest+2)+"┘\n")
+        sys.stdout.flush()
     def on_release(self,key):
         if key == self.up:
             self.index-=1
             if self.index<0:
                 self.index=0;
                 return
-            sys.stdout.write("\r\033[A"*self.lines)
+            sys.stdout.write("\r\033[A"*(self.lines+2))
             if self.lines>=os.get_terminal_size().lines:
                 sys.stdout.write("\033[2J\033[H\033c")
                 sys.stdout.flush()
@@ -50,7 +54,7 @@ class ChoiceInput:
             if self.index == self.lines-1:
                 self.index=0
             else:self.index+=1
-            sys.stdout.write("\r\033[A"*self.lines)
+            sys.stdout.write("\r\033[A"*(self.lines+2))
             if self.lines>=os.get_terminal_size().lines:
                 sys.stdout.write("\033[2J\033[H\033c")
                 sys.stdout.flush()

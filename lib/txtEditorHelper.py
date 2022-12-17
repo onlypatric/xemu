@@ -26,8 +26,10 @@ def showHelp():
     sys.stdout.write(help_txt_no)
 
 class _Editor:
-    def __init__(self,fName:"str|None"=None) -> None:
+    def __init__(self,fName:"str|None"=None,settings:"dict[str,str]"={}) -> None:
         self.size=(20,80)
+        self.settings=settings
+        self.lines=int(self.settings.get("lines",0)) if str(self.settings.get("lines",0)).isdigit() else 0
         try:
             self.size=(os.get_terminal_size().lines,os.get_terminal_size().columns)
         except:pass
@@ -40,11 +42,12 @@ class _Editor:
             except:
                 self.fName="untilted.txt"
                 open(self.fName,"x")
+        self.textDefault=open(self.fName,"r").read()
         self.fName=fName
         curses.wrapper(self.main)
 
     def main(self,stdscr):
-        self.editor=Editor(stdscr,title="XEditor",box=False,win_size=self.size,win_location=(5,5),save=self.save)
+        self.editor=Editor(stdscr,max_paragraphs=self.lines,inittext=self.textDefault,edit=not (self.settings.get("r",False) or self.settings.get("read",False)),box=(self.settings.get("b",False) or self.settings.get("box",False)),title="XEditor",win_size=self.size,win_location=(5,5),save=self.save)
         try:
             self.editor()
         except KeyboardInterrupt:pass

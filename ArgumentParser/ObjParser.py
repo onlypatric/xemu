@@ -17,6 +17,6 @@ def FindParams(string:str):
     return obj
 
 if __name__=="__main__":
-    params="file.py --hello main2.py -w -world=320 --object=\"32bit\" main.py main-py.py main3.py"
+    params="file.py --hello main2.py object=\"23\" -w -world=320 --object=\"32bit\" main.py main-py.py main3.py"
     print(FindSettings(params))
     print(FindParams(params))
