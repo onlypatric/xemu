@@ -46,3 +46,9 @@ exec(open("main.py").read())
 ```
 
 so not only this shell interpreter has some very cool built-ins, it also handles python objects directly typed into the terminal's input (plus takes formulas, conditions and evaluates them if needed with `eval()` method), and you got all the powershell's latest and most powerful features, xemu is made to adapt itself to any powershell 7.0+ version, so **have fun with XEmu**!
+
+ - Author [Patric](mailto://patric.personal99@gmail.com)
+ - Twitter [Twitter](https://www.twitter.com/justpatricc)
+ - Instagram [Instagram](https://www.twitter.com/only.patric)
+
+Licensed under [MIT license](LICENSE)
