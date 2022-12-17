@@ -1,0 +1,6 @@
+__pycache__/
+.vscode/
+ArgumentParser/__pycache__/
+CInput/__pycache__/
+lib/__pycache__/
+charset.txt
