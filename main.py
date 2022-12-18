@@ -1,18 +1,30 @@
 #! /usr/bin/python3
+
+#datetime used for formatOptions and other stuff
 import datetime
+#coloring and styling
 from colorama import Back, Fore, Style, init
+#keys costants
 from pynput.keyboard import Key,KeyCode
+#libraries made up for xemu
 from lib import formats,login,txtEditorHelper as xEditor,Commands
+#Path creator (so xemu doesn't have to create a path handler from zero)
 from pathlib import Path
+#Some costants such as error messages
 from const import *
+#os,sys for basic functions, argument parser to parse the args under a way which is good for xemu commands
 import os,sys,ArgumentParser,appdirs,json
+#choice input and powershell executor (subprocess)
 import CInput as CI,subprocess as pwsh
+#keyboard listener
 import pynput.keyboard as kb
 
 init(1)
 
+#create const dict to be used in prompt with exec(...)
 const={}
 
+#in case user wants to reset prompt
 defaultPrompt={
     "#FORMAT": "$T2$L$T4$I$T2$G$T7$T6$U3$CR8$U1$T4$J$T9$Q$U3[$T7$O$T9]$U1$U2$U2$Q$T6$CH7$T1$Q$T8$CH1$Q$T2$CH6$Q$T7$U1$G$G$G$T1$Q",
 }
@@ -23,6 +35,7 @@ def chunks(xs, n) -> int:
     n = max(1, n)
     return (xs[i:i+n] for i in range(0, len(xs), n))
 
+# app itself
 class Console:
 
 # ---------------------- check if user set to silent mode
@@ -33,7 +46,8 @@ class Console:
         return self.get(self.variables,"#SHOWCODE","False")
 # ---------------------- initialize default variables
     def __init__(self) -> None:
-        self.prc=None
+
+        # default variables
         self.variables = {
             "#FORMAT": "$T2$L$T4$I$T2$G$T7$T6$U3$CR8$U1$T4$J$T9$Q$U3[$T7$O$T9]$U1$U2$U2$Q$T6$CH7$T1$Q$T8$CH1$Q$T2$CH6$Q$T7$U1$G$G$G$T1$Q",
             "#SHOWCODE": "False",
@@ -42,17 +56,28 @@ class Console:
             "#PATH":os.environ["PATH"],
             "#CWD":os.getcwd(),
         }
-
+        try:
+            self.ispwsh= bool(pwsh.run("powershell -h",stdout=pwsh.PIPE).returncode)
+        except:
+            self.ispwsh=False
+        #check where the home is
         self.home=str(Path.home().absolute())
+        #update variables to include home
         self.variables.update({
             "#HOME":self.home
         })
+        # if path is specified navigate in it instead of home
         if(type(self.get(sys.argv,1,False))==str and os.path.exists(sys.argv[1]) and os.path.isdir(sys.argv[1])):
+            try:
                 os.chdir(sys.argv[1])
+            except:
+                os.chdir(self.home)
         else:
             os.chdir(self.home)
+        #invoke all commands and help section
         self.setCommands();
-        self.execute(["clear"])
+        self.setHelp();
+        #get user data dir and save variables in it
         self.dir=appdirs.user_data_dir("xemu","GrowPlan","1.0")
         if not os.path.exists(self.dir):
             try:
@@ -65,6 +90,18 @@ class Console:
                     json.load(open(self.dir+"/config.json"))
                 )
             except:pass
+        #clear console if there is no __init__.xemu in navigated directory, else execute __init__
+        if "__init__.xemu" in os.listdir(os.getcwd()):
+            #print initializer if needed
+            if not(("-n" in sys.argv) or ("--no-init-message" in sys.argv) or self.variables.get("#SILENT",False)=="True" or self.variables.get("#SILENT",False)=="1" or self.variables.get("#SILENT",False)=="true"):
+                sys.stdout.write(f"      {Fore.GREEN}XEmu {Fore.WHITE}- {Fore.YELLOW}Powerful Terminal Emulator{Fore.RESET}\n   type 'xhelp' for a list of xemu commands\n\n")
+            self.execute(["xemu","./__init__.xemu"])
+        else:   
+            self.execute(["clear"])
+            #print initializer if needed
+            if not(("-n" in sys.argv) or ("--no-init-message" in sys.argv) or self.variables.get("#SILENT",False)=="True" or self.variables.get("#SILENT",False)=="1" or self.variables.get("#SILENT",False)=="true"):
+                sys.stdout.write(f"      {Fore.GREEN}XEmu {Fore.WHITE}- {Fore.YELLOW}Powerful Terminal Emulator{Fore.RESET}\n   type 'xhelp' for a list of xemu commands\n\n")
+            
 # ---------------------- setup default commands
     def setHelp(self):
         self.helpCommas={
@@ -81,10 +118,15 @@ class Console:
             "xed":Commands.TerminalEditor,
             "Xemu-Editor":Commands.TerminalEditor,
             "xe":Commands.TerminalEditor,
+            "xemu":Commands.xemu,
             "xhelp":Commands.help,
             "exit":Commands.exit,
         }
     def setCommands(self):
+        # TODO: add variable creation by user
+        # not sure if we're going to add it since
+        # xemu already has a variable storer in it (python interpreter)
+        # there is already a somewhat variable storer (Console.sVar), but not yet very good at the job
         self.commands={
             "run":self.runFile,
             "prompt":self.prompt,
@@ -99,6 +141,7 @@ class Console:
             "xed":self.TerminalEditor,
             "Xemu-Editor":self.TerminalEditor,
             "xe":self.TerminalEditor,
+            "xemu":self.xemu,
             "xhelp":self.help,
             "exit":lambda:sys.exit(0),
         }
@@ -352,7 +395,18 @@ class Console:
     def help(self):
         _commas:list[str]=[i for i in self.commands.keys()]
         sys.stdout.write(f"{Fore.GREEN}<{Fore.CYAN}PgUp{Fore.GREEN}>{Fore.WHITE} - Go up\n{Fore.GREEN}<{Fore.CYAN}PgDn{Fore.GREEN}>{Fore.WHITE} - Go down{Fore.RESET}\n")
-        cmd_=CI.ChoiceInput(_commas,True,up=Key.up,down=Key.down,color=Style.BRIGHT+Fore.MAGENTA+Back.CYAN).get()
+        cmd_=CI.ChoiceInput(_commas,self.last_settings.get("c",False)or self.last_settings.get("colored",False),up=Key.up,down=Key.down,color=Style.BRIGHT+Fore.MAGENTA+Back.CYAN).get() if self.get(self.last_params,0,None)==None else self.last_params[0]
+        for a,b in self.helpCommas.items():
+            if a==cmd_:
+                try:
+                    b()
+                    break;
+                except:pass
+        else:
+            print("xemu command not found")
+# ---------------------- execute script files (somewhat like .bat files and .sh)
+    def xemu(self):
+        self.runFile(self.get(self.last_params,0,None))
 
     def execute(self,parameters:"list[str]"=None,settings:"dict[str,str]"=None):
         formats.update()
@@ -368,6 +422,12 @@ class Console:
         self.last_settings=settings
         self.last_params=parameters
         self.last_command=command
+        if command.endswith(".xemu"):
+            try:
+                self.runFile(command)
+                return
+            except:
+                return
         for name,func in self.commands.items():
             if name==command:
                 try:
@@ -394,8 +454,11 @@ class Console:
                     exec(comma,globals())
                     return
                 except Exception as e:pass
-                PWRESPONSE=pwsh.run(f"powershell \"{self.last}\"")
-                CODE=PWRESPONSE.returncode
+                if self.ispwsh:
+                    PWRESPONSE=pwsh.run(f"powershell \"{self.last}\"")
+                    CODE=PWRESPONSE.returncode
+                else:
+                    CODE=os.system(self.last)
                 if self.isSilent()=="False":
                     if self.showCode()=="True":
                         if not CODE:
@@ -458,7 +521,31 @@ class Console:
                 except KeyboardInterrupt:
                     sys.stdout.write("\n")
                     pass
-    
+    def runFile(self,fName:str=None):
+        if fName is None:
+            return;
+        if not fName.endswith(".xemu"):
+            sys.stdout.write("not a xemu command container file\n")
+            return;
+        if not os.path.exists(fName):
+            sys.stdout.write(f"{fName} not found...\n")
+            return;
+        if not os.path.isfile(fName):
+            sys.stdout.write(f"{fName} not a file...\n")
+            return;
+        for i in open(fName).read().splitlines():
+            try:
+                self.last=i
+                self.parsed=[ArgumentParser.FindSettings(self.last),ArgumentParser.FindParams(self.last)]
+                if self.last.startswith("set"):
+                    self.sVar()
+                else:
+                    self.execute()
+                formats.update()
+                self.update()
+            except KeyboardInterrupt:
+                sys.stdout.write("\n")
+                pass
     def get(self,arr,idx,_def):
         try:
             return arr[idx]

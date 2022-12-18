@@ -1,0 +1,4 @@
+const["message"]="hello world"
+print(const["message"])
+echo "Hello"
+ls .

@@ -1,6 +1,6 @@
 import curses,sys
 import os
-from editor.editor import Editor
+from .editor import Editor
 from colorama import Fore
 
 def showHelp():

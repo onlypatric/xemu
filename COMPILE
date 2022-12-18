@@ -1,0 +1,5 @@
+NT:
+python -m PyInstaller -F --icon="icon/icon.png" --version-file="VERSION.txt" main.py
+
+POSIX:
+python3 -m PyInstaller -F --icon="icon/icon.png" --version-file="VERSION.txt" main.py

@@ -45,6 +45,8 @@ for example:
 exec(open("main.py").read())
 ```
 
+create a initializer script that runs everytime you start xemu by creating in your home directory a file called `__init__.xemu`, it can contain any command that you give to xemu itself, so like `"ls" "cd"` and so on...
+
 so not only this shell interpreter has some very cool built-ins, it also handles python objects directly typed into the terminal's input (plus takes formulas, conditions and evaluates them if needed with `eval()` method), and you got all the powershell's latest and most powerful features, xemu is made to adapt itself to any powershell 7.0+ version, so **have fun with XEmu**!
 
  - Author [Patric](mailto://patric.personal99@gmail.com)

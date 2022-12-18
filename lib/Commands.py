@@ -42,11 +42,9 @@ ALIAS
     navdir
 """)
 def shdir():
-    """"""
-def shdir():
-    """"""
-def shdir():
-    """"""
+    sys.stdout.write("prints contents of a directory (default is the current working directory)\nspecify '-a' or '--all' to show more info about each file/dir\n")
+def xemu():
+    sys.stdout.write("opens a .xemu file and executes line-by-line each contained script (like .bat and .sh files)\n")
 def byteTForm():
     """Transforms given byte amount (either B,KB,MB,GB,TB,PB) into all the byte forms\ntry:\nbyte 1TB\n"""
 def TerminalEditor():
